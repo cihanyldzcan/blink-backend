@@ -14,21 +14,19 @@ exports.getMatches = async (req, res) => {
     let matchesQuery;
     if (gender === 'Male') {
       matchesQuery = `
-        SELECT m.id as match_id, m.is_video_call_unlocked, u.id as partner_id, c.image_url as partner_avatar
+        SELECT DISTINCT ON (m.id) m.id as match_id, m.is_video_call_unlocked, u.id as partner_id, u.username, u.avatar_url as partner_avatar
         FROM matches m
         JOIN users u ON m.female_user_id = u.id
-        LEFT JOIN capsules c ON c.user_id = u.id
         WHERE m.male_user_id = $1
-        ORDER BY m.last_message_at DESC
+        ORDER BY m.id, m.last_message_at DESC
       `;
     } else {
       matchesQuery = `
-        SELECT m.id as match_id, m.is_video_call_unlocked, u.id as partner_id, c.image_url as partner_avatar
+        SELECT DISTINCT ON (m.id) m.id as match_id, m.is_video_call_unlocked, u.id as partner_id, u.username, u.avatar_url as partner_avatar
         FROM matches m
         JOIN users u ON m.male_user_id = u.id
-        LEFT JOIN capsules c ON c.user_id = u.id
         WHERE m.female_user_id = $1
-        ORDER BY m.last_message_at DESC
+        ORDER BY m.id, m.last_message_at DESC
       `;
     }
 
@@ -46,7 +44,7 @@ exports.getMatches = async (req, res) => {
 // Eşleşmeye ait eski mesajları getirir
 exports.getMessages = async (req, res) => {
   try {
-    const { match_id } = req.params;
+    const { match_id } = req.query;
     
     const messagesRes = await db.query(
       `SELECT * FROM messages WHERE match_id = $1 ORDER BY created_at ASC`,

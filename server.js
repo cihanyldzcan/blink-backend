@@ -3,7 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 require('dotenv').config();
-const { sendPush } = require('./src/services/pushService');
+// const { sendPush } = require('./src/services/pushService');
 
 const db = require('./src/config/db');
 
@@ -80,14 +80,14 @@ io.on('connection', (socket) => {
                 const receiverId = sender_id == matchRes.rows[0].male_user_id ? matchRes.rows[0].female_user_id : matchRes.rows[0].male_user_id;
                 const receiverRes = await db.query('SELECT expo_push_token FROM users WHERE id = $1', [receiverId]);
                 const senderRes = await db.query('SELECT username FROM users WHERE id = $1', [sender_id]);
-                if (receiverRes.rows.length > 0 && receiverRes.rows[0].expo_push_token && senderRes.rows.length > 0) {
-                    sendPush(
-                        receiverRes.rows[0].expo_push_token,
-                        `${senderRes.rows[0].username} sana mesaj gönderdi`,
-                        content,
-                        { match_id }
-                    );
-                }
+                  if (receiverRes.rows.length > 0 && receiverRes.rows[0].expo_push_token) {
+                      // sendPush(
+                      //     receiverRes.rows[0].expo_push_token,
+                      //     `${senderRes.rows[0].username} sana mesaj gönderdi`,
+                      //     content,
+                      //     { match_id }
+                      // );
+                  }
             }
 
             // 5. Bot Auto-Responder (Eğer alıcı bot ise)
